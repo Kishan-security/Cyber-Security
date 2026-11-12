@@ -1,25 +1,32 @@
 
 import socket
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-client.connect(("RECEIVER_IP", 5000))
+server.bind(("0.0.0.0", 5000))
 
-print("Connected to receiver!")
+server.listen(1)
+
+print("Waiting for sender...")
+
+conn, addr = server.accept()
+
+print("Connected with:", addr)
 
 while True:
-    message = input("Sender: ")
-
-    client.send(message.encode())
-
-    if message.lower() == "exit":
-        break
-
-    data = client.recv(1024).decode()
-
-    print("Receiver:", data)
+    data = conn.recv(1024).decode()
 
     if data.lower() == "exit":
         break
 
-client.close()
+    print("Sender:", data)
+
+    reply = input("Receiver: ")
+
+    conn.send(reply.encode())
+
+    if reply.lower() == "exit":
+        break
+
+conn.close()
+server.close()
